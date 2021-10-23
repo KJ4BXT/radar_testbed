@@ -29,13 +29,14 @@ sdr.tx_hardwaregain_chan0 = -50 # Increase to increase tx power, valid range is 
 
 N = 10000 # number of samples to transmit at once
 t = np.arange(N)/fs
-samples = 0.5*np.exp(2.0j*np.pi*100e3*t) # Simulate a sinusoid of 100 kHz
-samples2 = 0.5*np.exp(2.0j*np.pi*900e3*t) # Simulate a sinusoid of 100 kHz
-samples *= 2**14 # The PlutoSDR expects samples to be between -2^14 and +2^14, not -1 and +1 like some SDRs
+source_sig = 0.5*np.exp(2.0j*np.pi*5e7*t*t)
+window = np.kaiser(len(source_sig), 10)
+source_sig *= window
+source_sig *= 2**14 # The PlutoSDR expects samples to be between -2^14 and +2^14, not -1 and +1 like some SDRs
 sdr.tx_cyclic_buffer = True # Enable cyclic buffers
 
 
-sdr.tx(samples) # transmit the batch of samples once
+sdr.tx(source_sig) # transmit the batch of samples once
 
 
 RX = sdr.rx() # receive samples off Pluto
@@ -44,18 +45,18 @@ sdr.tx_destroy_buffer()
 #stuff below is redundant, copied from other file. Clean up later.
 np.seterr(divide = 'ignore') # This is a hack and bad and you shouldn't do it
 
-'''
 DPC = np.zeros(len(RX)) # Digital pulse compression vector
 for i in range(len(RX)-1):
     if ((i>len(pulse)) and (i<(len(RX)-len(pulse)-1))): # Only process full returns
         DPC[i] = np.correlate(RX[i:i+len(pulse)],pulse)[0]
-'''
+
 
 g.waterfall(RX, 128)
+#g.waterfall(source_sig,128)
 #waterfall(pulse, 256)
 
-#plt.figure()
-#plt.plot(t[:slice_len],10*np.log10(abs(DPC[:slice_len])))
+plt.figure()
+plt.plot(t[:slice_len],10*np.log10(abs(DPC[:slice_len])))
 
 
 plt.ion()

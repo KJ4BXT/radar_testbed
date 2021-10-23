@@ -16,16 +16,21 @@ import graphing as g
 # TODO: have setup paramaters in a seperate file
 fs = 1e6 # baseband sampling frequency. 10MHz startpoint
 dur = .5 # length of simulation
-t = np.arange(0,dur,1/int(fs))
-freq = 0.2e6 # test signal freq. 0.3MHz CW startpoint
-BW = 0.3e9
+freq = 0 # test signal freq. 0.3MHz CW startpoint
+BW = 5e7
 pulse_dur = 0.0005 # 10 ms startpoint
 pulse_len = int(fs*pulse_dur)
+
+N = 1e4 # number of pulse samples
+t = np.arange(N)/fs
+
 #source_sig = np.sin(np.array(t[:pulse_len])*np.pi*2*freq*(2.5+2.5*-np.cos(2*np.pi*BW*np.array(t[:pulse_len]))))
 #source_sig = np.e**(1j*2*np.pi*freq*t[:pulse_len])
-source_sig = np.e**(1j*2*np.pi*(freq + BW*t[:pulse_len])*t[:pulse_len])
+#source_sig = np.e**(1j*2*np.pi*(freq + BW*t[:pulse_len])*t[:pulse_len])
+source_sig = 0.5*np.exp(2.0j*np.pi*(freq+BW*t)*t) # Simulate a sinusoid of 100 kHz
+
 window = np.kaiser(len(source_sig), 10)
-pulse = source_sig#*window
+pulse = source_sig*window
 
 slice_dur = pulse_dur # <- set this one
 slice_len = int(slice_dur*fs)
@@ -51,7 +56,7 @@ for i in range(len(t)):
 
 '''
 
-g.waterfall2(pulse,256)
+g.waterfall(pulse,256)
 
 #Graph stuff
 #plt.figure()

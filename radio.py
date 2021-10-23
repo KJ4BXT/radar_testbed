@@ -8,48 +8,37 @@ Created on Wed Oct 20 01:30:58 2021
 import matplotlib.pyplot as plt
 import numpy as np
 import graphing as g
+#from time import sleep
 import adi
 
-fs = 1e6 # MHz
-center_freq = 5700e6 # MHz
-num_samps = 1e6 # number of samples returned per call to rx()
-
-dur = .2 # length of simulation, need to change to pulse based?
-t = np.arange(0,dur,1/int(fs))
-freq = 0.2e6 # test signal freq. 0.3MHz CW startpoint
-BW = 0.3e9
-pulse_dur = 0.0005 # 10 us startpoint
-pulse_len = int(fs*pulse_dur)
+fs = 1e6 # Hz
+center_freq = 100e6 # Hz
+num_samps = 10000 # number of samples returned per call to rx()
 
 sdr = adi.Pluto()
-sdr.tx_destroy_buffer()
 sdr.gain_control_mode_chan0 = 'manual'
-sdr.rx_hardwaregain_chan0 = 5.0 # dB, allowable range is 0 to 74.5 dB
+sdr.rx_hardwaregain_chan0 = 50.0 # dB
 sdr.rx_lo = int(center_freq)
-sdr.tx_lo = int(center_freq)
-sdr.sample_rate = int(fs)
-sdr.rx_rf_bandwidth = int(fs) # filter width, adjust later
-sdr.tx_hardwaregain_chan0 = -50 # Increase to increase tx power, valid range is -90 to 0 dB
-sdr.tx_cyclic_buffer = True # Enable cyclic buffers
+sdr.fs = int(fs)
+sdr.rx_rf_bandwidth = int(fs) # filter width, just set it to the same as sample rate for now
 sdr.rx_buffer_size = num_samps
 
-slice_dur = dur # <- set this one
-slice_len = int(slice_dur*fs)
+sdr.tx_rf_bandwidth = int(fs) # filter cutoff, just set it to the same as sample rate
+sdr.tx_lo = int(center_freq)
+sdr.tx_hardwaregain_chan0 = -50 # Increase to increase tx power, valid range is -90 to 0 dB
 
-#sample code from site
-num_symbols = 1000
-source_sig = np.e**(1j*2*np.pi*(freq + BW*t[:pulse_len])*t[:pulse_len])
-#source_sig = np.e**(1j*2*np.pi*freq*t[:pulse_len])
-window = np.kaiser(len(source_sig), 10)
-pulse = source_sig*window
-pulse_tx = np.concatenate((pulse,np.zeros(int(1e6))))
-#samples = np.repeat(pulse, 32) # 16 samples per symbol (rectangular pulses)
-pulse_tx *= 2**14 # The PlutoSDR expects samples to be between -2^14 and +2^14, not -1 and +1 like some SDRs
+N = 10000 # number of samples to transmit at once
+t = np.arange(N)/fs
+samples = 0.5*np.exp(2.0j*np.pi*100e3*t) # Simulate a sinusoid of 100 kHz
+samples2 = 0.5*np.exp(2.0j*np.pi*900e3*t) # Simulate a sinusoid of 100 kHz
+samples *= 2**14 # The PlutoSDR expects samples to be between -2^14 and +2^14, not -1 and +1 like some SDRs
+sdr.tx_cyclic_buffer = True # Enable cyclic buffers
 
-sdr.tx(pulse_tx) # start transmitting
+
+sdr.tx(samples) # transmit the batch of samples once
+
 
 RX = sdr.rx() # receive samples off Pluto
-
 sdr.tx_destroy_buffer()
 
 #stuff below is redundant, copied from other file. Clean up later.
@@ -62,7 +51,7 @@ for i in range(len(RX)-1):
         DPC[i] = np.correlate(RX[i:i+len(pulse)],pulse)[0]
 '''
 
-#waterfall2(RX, 256)
+g.waterfall(RX, 128)
 #waterfall(pulse, 256)
 
 #plt.figure()

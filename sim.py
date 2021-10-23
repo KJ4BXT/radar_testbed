@@ -9,18 +9,17 @@ Signal generation and processing tests
 
 import numpy as np
 import matplotlib.pyplot as plt
-%matplotlib qt
-#%matplotlib inline
+import graphing as g
 
  #Signal generation and setup
 # TODO: convert to complex (IQ) format
 # TODO: have setup paramaters in a seperate file
-fs = 10e6 # baseband sampling frequency. 10MHz startpoint
-dur = .2 # length of simulation
+fs = 1e6 # baseband sampling frequency. 10MHz startpoint
+dur = .5 # length of simulation
 t = np.arange(0,dur,1/int(fs))
-freq = 1e6 # test signal freq. 0.3MHz CW startpoint
-BW = 2.5e10
-pulse_dur = 100e-6 # 10 us startpoint
+freq = 0.2e6 # test signal freq. 0.3MHz CW startpoint
+BW = 0.3e9
+pulse_dur = 0.0005 # 10 ms startpoint
 pulse_len = int(fs*pulse_dur)
 #source_sig = np.sin(np.array(t[:pulse_len])*np.pi*2*freq*(2.5+2.5*-np.cos(2*np.pi*BW*np.array(t[:pulse_len]))))
 #source_sig = np.e**(1j*2*np.pi*freq*t[:pulse_len])
@@ -50,41 +49,9 @@ for i in range(len(t)):
     if ((i>pulse_len) and (i<(len(t)-pulse_len-1))): # Only process full returns
         DPC[i] = np.correlate(RX[i:i+pulse_len],pulse)
 
-#stuff below is redundant, copied from other file. Clean up later.
 '''
-def waterfall(iq,n=1024):
-    global freq_domain
-    freq_domain = np.zeros((int(len(iq)/n),n))
-    for i in range(int((len(iq-n)/n))):
-        try:
-            freq_domain[i] = 10*np.log10(abs(np.fft.fft(iq[i*n:(i+1)*n],n)**2))
-        except Exception:
-            print('error')
-    plt.figure()
-    plt.imshow(freq_domain, cmap='hot', extent=[0,fs/1e6,len(freq_domain),0],interpolation='nearest')
 
-
-def waterfall2(iq,n=1024):
-    global freq_domain
-    #freq_domain = np.zeros((int(len(iq)),n))
-    freq_domain = np.zeros(n)
-    print(int(len(iq)))
-    for i in range(int(len(iq))):
-        #print((i+1)*n-i*n)
-        #freq_domain[i] = 10*np.log10(abs(np.fft.fft(iq[i*n:(i+1)*n],n)**2))
-        #temp = 10*np.log10(abs(np.fft.fft(iq[i*n:(i+1)*n],n)**2))
-        temp = 10*np.log10(abs(np.fft.fft(iq[i:i+1+n],n)**2))
-        #print(temp)
-        freq_domain = np.vstack((freq_domain,temp))
-        if i > 5:
-            #break
-            continue
-    plt.figure()
-    plt.imshow(freq_domain, cmap='hot', extent=[0,fs/2e6,len(freq_domain),0])#interpolation='nearest')
-    #plt.plot(freq_domain[5])
-
-
-waterfall2(pulse,1024)
+g.waterfall2(pulse,256)
 
 #Graph stuff
 #plt.figure()

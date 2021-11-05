@@ -3,6 +3,7 @@
 Created on Wed Oct 20 01:30:58 2021
 
 This file handles the receive and transmit 
+and a whole lot more until I clean it up
 
 @author: Zac
 """

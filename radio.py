@@ -10,7 +10,6 @@ and a whole lot more until I clean it up
 
 import matplotlib.pyplot as plt
 import numpy as np
-import graphing as g
 #from time import sleep
 import adi
 
@@ -55,10 +54,6 @@ np.seterr(divide = 'ignore') # This is a hack and bad and you shouldn't do it
 
 DPC = abs(np.correlate(RX,pulse))
 DPC *= 1/max(DPC)
-
-g.waterfall(RX, 128)
-g.waterfall(source_sig,128)
-#waterfall(pulse, 256)
 
 slice_len = -1
 

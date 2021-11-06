@@ -9,17 +9,28 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pint import UnitRegistry # u for unit
 
+u = UnitRegistry() # u for unit
+
 #%matplotlib qt
 #%matplotlib inline
 
-def distance(t, unit):
+def radar_distance(t, unit='mi'):
     # altitude = # todo: look into if air density measurably affects range
     # temp = 20 # degrees C
     # c = some equation relating density
-    units = ('km','mi','nmi','m','yd',)
+    units = ('km','mi','nmi','m','yd','ft')
     if not unit in units:
         raise Exception("invalid distance unit conversion input")
-    return()
+    d = t/2*u.sec*u.speed_of_light
+    return(d.to(unit))
+
+def distance(t, unit='mi'): # Kinda redundant, might delete later
+    units = ('km','mi','nmi','m','yd','ft')
+    if not unit in units:
+        raise Exception("invalid distance unit conversion input")
+    d = t*u.sec*u.speed_of_light
+    return(d.to(unit))
+
 
 def waterfall(iq,n=1024,fs=1e6):
     global freq_domain

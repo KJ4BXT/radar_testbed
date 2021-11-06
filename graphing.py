@@ -6,6 +6,8 @@ I wish this could be a .ipy file so I could set matplotlib graphing options
 """
 
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from matplotlib import cm # colour manager
 import numpy as np
 from pint import UnitRegistry # u for unit
 
@@ -86,8 +88,35 @@ def waterfall3(iq,n=1024,fs=1e6,padz=512):
     plt.imshow(freq_domain, cmap='hot', extent=[0,1,1,0],interpolation='nearest')
 
 
-def plot_iq(iq):
+def plot_iq(iq): # Takes single complex array. Plots both iq channels vs time.
     plt.figure()
     plt.plot(iq.real)
     plt.plot(iq.imag)
 
+def plot_3D(data): # Takes 2D Z array. Need to clean up
+    x, y = np.meshgrid(range(data.shape[0]), range(data.shape[1]))
+    
+    # show hight map in 3d
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    # The scaling below is awful and needs to be fixed
+    ax.plot_surface(x, y, np.clip(10+10*np.log10(np.transpose(data)),0,50), cmap=cm.hot)
+    plt.title('z as 3d height map')
+    plt.show()
+
+def animated(data): #2D array, regular plot
+    fig, ax = plt.subplots()
+    line, = ax.plot(data[0])
+    
+    def animate(i):
+        line.set_ydata(data[i])  # update the data
+        return line,
+    
+    # Init only required for blitting to give a clean slate.
+    def init():
+        line.set_ydata(np.ma.array(data[0], mask=True))
+        return line,
+    
+    ani = animation.FuncAnimation(fig, animate, np.arange(1, len(data)),
+                                  init_func=init, interval=150, blit=True) # interval in ms?
+    plt.show()

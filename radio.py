@@ -48,18 +48,3 @@ sdr.tx(source_sig) # transmit the batch of samples once
 
 RX = sdr.rx() # receive samples off Pluto
 sdr.tx_destroy_buffer()
-
-#stuff below is redundant, copied from other file. Clean up later.
-np.seterr(divide = 'ignore') # This is a hack and bad and you shouldn't do it 
-
-DPC = abs(np.correlate(RX,pulse))
-DPC *= 1/max(DPC)
-
-slice_len = -1
-
-plt.figure()
-#plt.plot(t[:slice_len],10*np.log10(abs(DPC[:slice_len])))
-plt.plot(10*np.log10(DPC))
-
-plt.ion()
-plt.show()

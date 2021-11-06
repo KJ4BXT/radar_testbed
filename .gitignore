@@ -2,3 +2,4 @@
 *.pyc
 *.stats
 scratchpad_01.py
+*.npy
